@@ -7,8 +7,14 @@ Extends (does not replace) the module's existing guard behaviour.
 - Odoo **17.0** only. No syntax, field, or API that requires 18/19.
 - License `OPL-1`, author `Otomater`, model prefix `otm.`.
 - Depends only on `base`, `web`, `custom_leads`. No hard dependency on
-  `software_telegram` or any mail module — Telegram push is optional and
-  must degrade to a safe no-op if the bridge isn't installed/configured.
+  `software_telegram` — Telegram push is optional and must degrade to a
+  safe no-op if the bridge isn't installed/configured.
+- **Revised after real testing (spec.md Open Question 6):** the code is
+  now also emailed to the requester via Odoo's own `mail.mail`, which
+  `custom_leads` already pulls in transitively (it uses chatter), so no
+  new entry was added to `depends`. This is not declared as a hard
+  dependency either way: if `mail.mail` is ever unavailable, the
+  try/except around it fails silently rather than breaking the reveal.
 
 ## Security
 - Never touch `ir.model.access.csv` rows, views, or security rules

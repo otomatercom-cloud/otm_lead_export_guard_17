@@ -106,7 +106,46 @@ class OtmLeadExportRequest(models.Model):
         self.write({'code_plain_pending': False})  # …then wiped immediately. See plan.md.
         self._log('requested', note=f'Code revealed by {approver_user.name}')
         self._notify_telegram_stub()
+        self._email_code_to_requester(code)
         return code
+
+    def _email_code_to_requester(self, code):
+        """Mails the just-revealed code to the requester, in addition to
+        the approver handing it over directly. Not a scope violation of
+        constitution.md's "never visible to the requester" rule — that
+        rule is about Odoo's own views/logs never rendering it before
+        the approver acts; the requester always had to receive this
+        exact plaintext through some side channel to ever type it back
+        in, so this only automates that unavoidable hand-off. Unlike the
+        Telegram stub, this uses Odoo's own `mail.mail` — no external
+        bridge is needed, only a working outgoing mail server configured
+        under Settings > Technical > Email. If none is configured (or
+        the send fails for any reason), this must never block the
+        reveal itself — the approver can still read the code aloud."""
+        self.ensure_one()
+        try:
+            partner = self.user_id.partner_id
+            if not partner or not partner.email:
+                _logger.warning(
+                    "Could not email export unlock code for request %s: "
+                    "requester %s has no email on file.", self.id, self.user_id.login)
+                return
+            body = (
+                f"<p>Your Lead Export unlock code is: <strong>{code}</strong></p>"
+                f"<p>Valid for 10 minutes, one use. Enter it under "
+                f"<b>Lead Export &gt; Export Requests</b>, on this request, "
+                f"using the <b>Enter Code</b> button.</p>"
+            )
+            self.env['mail.mail'].sudo().create({
+                'subject': 'Your Lead Export unlock code',
+                'body_html': body,
+                'email_to': partner.email,
+            }).send()
+        except Exception:
+            _logger.exception(
+                "Could not email export unlock code for request %s — "
+                "check Settings > Technical > Email > Outgoing Mail Servers.",
+                self.id)
 
     def action_enter_code(self, code):
         """Returns (ok: bool, message: str). Never raises — see plan.md

@@ -71,8 +71,10 @@ class OtmLeadExportApprovalWizardLine(models.TransientModel):
             'tag': 'display_notification',
             'params': {
                 'title': f'Code for {request.user_id.name}',
-                'message': f'{code} — valid 10 minutes, shown once. Give it to '
-                            f'{request.user_id.name} outside this screen.',
+                'message': f'{code} — valid 10 minutes, shown once. Also emailed to '
+                            f'{request.user_id.name} if they have an email on file and '
+                            f'an outgoing mail server is configured — tell them directly '
+                            f'too in case that mail does not arrive.',
                 'sticky': True,
                 'type': 'success',
             },

@@ -56,7 +56,6 @@ user, record count, field count, a note, and one of: `requested`,
 `unlocked`, `wrong_code`, `locked`, `expired`, `exported`, `blocked`.
 
 ## Out of scope
-- Email as the delivery channel for the code (no outgoing mail server).
 - Per-export record/row count limits.
 - File watermarking of exported data.
 - Wiring to the real `software_telegram` API (see Open Questions — a safe
@@ -105,7 +104,21 @@ on them — correct me if any is wrong and I'll adjust.
    now top-level rather than nested under Settings, specifically so a
    Director with no admin rights can still reach *Approvals* — see
    plan.md's "Menus" section.
-6. **Log `result` value for the approval/reveal step.** US7's result
+6. **Scope change: email now in use.** The original brief explicitly
+   excluded email as the code's delivery channel ("no outgoing mail
+   server"). The user later asked, after real testing, for the code to
+   also reach the requester by mail "if they can't access Odoo" —
+   reasonable, since the requester always has to receive this exact
+   plaintext through some side channel before they can type it back in;
+   this just automates that unavoidable hand-off. Implemented as
+   `OtmLeadExportRequest._email_code_to_requester()` using Odoo's own
+   `mail.mail` (no external bridge needed, unlike Telegram) — fired
+   right after the approver reveals the code, wrapped in try/except so
+   a missing/misconfigured outgoing mail server never blocks the reveal
+   itself. Requires a working outgoing mail server under Settings >
+   Technical > Email to actually deliver; the approver is still told
+   the code directly too, as a fallback.
+7. **Log `result` value for the approval/reveal step.** US7's result
    vocabulary (`requested`/`unlocked`/`wrong_code`/`locked`/`expired`/
    `exported`/`blocked`) has no dedicated value for "a Director revealed
    the code." Rather than add an 8th value outside what was specified,
