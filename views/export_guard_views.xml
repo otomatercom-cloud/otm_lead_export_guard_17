@@ -143,14 +143,25 @@
          own "Leads" menu, instead. Visible to every internal user so an
          Approver can always reach Approvals; the narrower items below
          restrict themselves individually. -->
+    <!-- The root carries its OWN action (the Export Requests list — a
+         normal full page, never a target="new" popup) so clicking the
+         "Lead Export" app icon always lands there deterministically.
+         Without this, Odoo falls back to auto-opening the first VISIBLE
+         child action for that user — which was "Request Export", a
+         target="new" wizard — so the app icon appeared to "only open
+         that popup" (reported after a real install). Every internal
+         user gets read-only ACL on otm.lead.export.request (see the
+         CSV) so this landing page never throws an AccessError for an
+         Approver with no other group — rule_otm_lead_export_request_own
+         simply shows them zero rows until they submit one. -->
     <menuitem id="menu_lead_export_root" name="Lead Export"
+              action="action_lead_export_request"
               groups="base.group_user" sequence="90"/>
     <menuitem id="menu_lead_export_request" name="Request Export" parent="menu_lead_export_root"
               action="action_export_request_wizard"
               groups="otm_lead_export_guard.group_lead_export" sequence="1"/>
     <menuitem id="menu_lead_export_requests" name="Export Requests" parent="menu_lead_export_root"
-              action="action_lead_export_request"
-              groups="otm_lead_export_guard.group_lead_export,base.group_system" sequence="2"/>
+              action="action_lead_export_request" sequence="2"/>
     <menuitem id="menu_lead_export_approvals" name="Approvals" parent="menu_lead_export_root"
               action="action_export_approval_wizard" sequence="3"/>
     <menuitem id="menu_lead_export_approvers" name="Approvers" parent="menu_lead_export_root"

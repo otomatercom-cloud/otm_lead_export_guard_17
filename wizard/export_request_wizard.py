@@ -19,15 +19,29 @@ class OtmLeadExportRequestWizard(models.TransientModel):
             'minutes': self.minutes,
         })
         request._log('requested', note='Request submitted')
+        # Close this popup and land on the request's own form (statusbar +
+        # the "Enter Code" button, which appears automatically once a
+        # Director approves it) — rather than leaving the user on just a
+        # toast with nothing to come back to. The toast shows first, then
+        # the client follows 'next' to open the form.
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': 'Export request sent',
                 'message': 'A Director must approve and reveal a code before '
-                            'you can export. Open Export Requests to track it, '
-                            'then use Enter Code once it is approved.',
+                            'you can export. "Enter Code" will appear here '
+                            'once it is approved.',
                 'sticky': False,
                 'type': 'success',
+                'next': {
+                    'type': 'ir.actions.act_window',
+                    'name': 'Export Request',
+                    'res_model': 'otm.lead.export.request',
+                    'res_id': request.id,
+                    'view_mode': 'form',
+                    'views': [(False, 'form')],
+                    'target': 'current',
+                },
             },
         }

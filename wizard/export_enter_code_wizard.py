@@ -31,11 +31,21 @@ class OtmLeadExportEnterCodeWizard(models.TransientModel):
                                  'This request does not belong to you.')
         ok, message = request.sudo().action_enter_code(self.code)
         return self._notify('success' if ok else 'danger',
-                             'Unlocked' if ok else 'Not unlocked', message)
+                             'Unlocked' if ok else 'Not unlocked', message,
+                             close=ok)
 
-    def _notify(self, kind, title, message):
+    def _notify(self, kind, title, message, close=False):
+        params = {'title': title, 'message': message, 'sticky': False, 'type': kind}
+        if close:
+            # On a correct code: close this dialog after the toast so the
+            # request form behind it (open since the request wizard's own
+            # redirect) refreshes and shows the new unlocked_until — same
+            # "don't leave the user stuck on just a toast" fix as the
+            # request wizard. On a wrong/locked code, the dialog stays
+            # open so they can try again (or see it's now locked).
+            params['next'] = {'type': 'ir.actions.act_window_close'}
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
-            'params': {'title': title, 'message': message, 'sticky': False, 'type': kind},
+            'params': params,
         }
