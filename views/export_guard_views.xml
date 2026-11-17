@@ -143,27 +143,33 @@
          own "Leads" menu, instead. Visible to every internal user so an
          Approver can always reach Approvals; the narrower items below
          restrict themselves individually. -->
-    <!-- The root carries its OWN action (the Export Requests list — a
-         normal full page, never a target="new" popup) so clicking the
-         "Lead Export" app icon always lands there deterministically.
-         Without this, Odoo falls back to auto-opening the first VISIBLE
-         child action for that user — which was "Request Export", a
-         target="new" wizard — so the app icon appeared to "only open
-         that popup" (reported after a real install). Every internal
-         user gets read-only ACL on otm.lead.export.request (see the
-         CSV) so this landing page never throws an AccessError for an
-         Approver with no other group — rule_otm_lead_export_request_own
-         simply shows them zero rows until they submit one. -->
+    <!-- Admin alone decides who even SEES this app: visible only to
+         base.group_system or group_lead_export. An Approver is never
+         left out of that, though — adding someone to Approvers
+         (models/export_approver.py._grant_export_group) grants them
+         group_lead_export automatically, as an admin-driven side effect
+         of that admin-only list, not something the user can get for
+         themselves. (An earlier version opened this root menu to every
+         internal user so a group-less Approver could still reach
+         Approvals — correctly flagged by the user as "all users can
+         enable, that's wrong." This is the narrower, admin-controlled
+         fix for the same underlying need.)
+         The root also carries its own `action` (the Export Requests
+         list — a normal full page, never target="new") so clicking the
+         app icon lands there deterministically instead of Odoo falling
+         back to the first child action, which was a popup wizard. -->
     <menuitem id="menu_lead_export_root" name="Lead Export"
               action="action_lead_export_request"
-              groups="base.group_user" sequence="90"/>
+              groups="otm_lead_export_guard.group_lead_export,base.group_system" sequence="90"/>
     <menuitem id="menu_lead_export_request" name="Request Export" parent="menu_lead_export_root"
               action="action_export_request_wizard"
               groups="otm_lead_export_guard.group_lead_export" sequence="1"/>
     <menuitem id="menu_lead_export_requests" name="Export Requests" parent="menu_lead_export_root"
-              action="action_lead_export_request" sequence="2"/>
+              action="action_lead_export_request"
+              groups="otm_lead_export_guard.group_lead_export,base.group_system" sequence="2"/>
     <menuitem id="menu_lead_export_approvals" name="Approvals" parent="menu_lead_export_root"
-              action="action_export_approval_wizard" sequence="3"/>
+              action="action_export_approval_wizard"
+              groups="otm_lead_export_guard.group_lead_export,base.group_system" sequence="3"/>
     <menuitem id="menu_lead_export_approvers" name="Approvers" parent="menu_lead_export_root"
               action="action_lead_export_approver" groups="base.group_system" sequence="4"/>
     <menuitem id="menu_lead_export_access" name="Export Access" parent="menu_lead_export_root"
