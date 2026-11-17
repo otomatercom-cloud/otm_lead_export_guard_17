@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_export_unlock" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.export.unlock</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" data-string="Lead Export" string="Lead Export"
+                     data-key="otm_lead_export_guard">
+                    <h2>Lead Export Unlock</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <field name="otm_export_notify_telegram"/>
+                                <label for="otm_export_notify_telegram"/>
+                                <div class="text-muted">
+                                    Not wired to a working Telegram integration yet —
+                                    see this module's spec.md. Turning this on has no
+                                    effect until that integration is built.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

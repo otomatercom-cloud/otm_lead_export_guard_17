@@ -1,7 +1,8 @@
 {
     'name': 'Lead Export Guard',
-    'version': '17.0.1.0.0',
-    'summary': 'Blocks lead export for everyone; only users granted access can export. Logs every attempt.',
+    'version': '17.0.1.1.0',
+    'summary': 'Blocks lead export for everyone except a code-approved, '
+                'time-limited unlock granted by a Director. Logs every step.',
     'author': 'Otomater',
     'website': 'https://otomater.com',
     'license': 'OPL-1',
@@ -10,7 +11,12 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'data/export_unlock_cron.xml',
+        'views/export_request_wizard_views.xml',
+        'views/export_approval_wizard_views.xml',
+        'views/export_enter_code_wizard_views.xml',
         'views/export_guard_views.xml',
+        'views/res_config_settings_views.xml',
     ],
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',

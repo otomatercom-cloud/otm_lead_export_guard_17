@@ -36,13 +36,15 @@
         <field name="name">otm.lead.export.log.list</field>
         <field name="model">otm.lead.export.log</field>
         <field name="arch" type="xml">
-            <tree create="0" edit="0" decoration-danger="result == 'blocked'">
+            <tree create="0" edit="0" decoration-danger="result in ('blocked', 'wrong_code', 'locked')">
                 <field name="date"/>
                 <field name="user_id"/>
                 <field name="result"/>
                 <field name="record_count"/>
                 <field name="field_count"/>
                 <field name="model"/>
+                <field name="request_id"/>
+                <field name="note"/>
             </tree>
         </field>
     </record>
@@ -53,7 +55,7 @@
             <search>
                 <field name="user_id"/>
                 <filter name="blocked" string="Blocked" domain="[('result', '=', 'blocked')]"/>
-                <filter name="allowed" string="Exported" domain="[('result', '=', 'allowed')]"/>
+                <filter name="allowed" string="Exported" domain="[('result', 'in', ('allowed', 'exported'))]"/>
                 <group>
                     <filter name="by_user" string="User" context="{'group_by': 'user_id'}"/>
                     <filter name="by_result" string="Result" context="{'group_by': 'result'}"/>
@@ -67,10 +69,94 @@
         <field name="view_mode">tree</field>
     </record>
 
-    <menuitem id="menu_lead_export_root" name="Lead Export" parent="base.menu_administration"
-              groups="base.group_system" sequence="90"/>
+    <!-- Export Requests: own requests for a normal user, everyone's for
+         base.group_system — enforced by rule_otm_lead_export_request_own,
+         not by this view. -->
+    <record id="view_lead_export_request_list" model="ir.ui.view">
+        <field name="name">otm.lead.export.request.list</field>
+        <field name="model">otm.lead.export.request</field>
+        <field name="arch" type="xml">
+            <tree create="0" decoration-danger="state == 'locked'" decoration-muted="state == 'expired'">
+                <field name="request_date"/>
+                <field name="user_id"/>
+                <field name="minutes"/>
+                <field name="state"/>
+                <field name="approver_id"/>
+                <field name="unlocked_until"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_lead_export_request_form" model="ir.ui.view">
+        <field name="name">otm.lead.export.request.form</field>
+        <field name="model">otm.lead.export.request</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="%(action_export_enter_code_wizard)d" type="action"
+                            string="Enter Code" class="btn-primary"
+                            invisible="state != 'approved'"
+                            context="{'default_request_id': id}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="sent,approved,expired,locked"/>
+                </header>
+                <group>
+                    <field name="user_id" readonly="1"/>
+                    <field name="request_date" readonly="1"/>
+                    <field name="minutes" readonly="1"/>
+                    <field name="approver_id" readonly="1"/>
+                    <field name="unlocked_until" readonly="1"/>
+                    <field name="attempts" readonly="1"/>
+                    <field name="reason" readonly="1"/>
+                </group>
+            </form>
+        </field>
+    </record>
+    <record id="action_lead_export_request" model="ir.actions.act_window">
+        <field name="name">Export Requests</field>
+        <field name="res_model">otm.lead.export.request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_lead_export_approver_list" model="ir.ui.view">
+        <field name="name">otm.lead.export.approver.list</field>
+        <field name="model">otm.lead.export.approver</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="user_id"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_lead_export_approver" model="ir.actions.act_window">
+        <field name="name">Approvers</field>
+        <field name="res_model">otm.lead.export.approver</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+    <!-- Deliberately NOT parented under base.menu_administration: that
+         menu's own groups_id (confirmed in Odoo 17 core,
+         base/views/base_menus.xml) is restricted to base.group_system /
+         base.group_erp_manager. An Approver is a standalone Director who
+         may hold neither (spec.md Open Question 5), so nesting here
+         would make Approvals unreachable for them. A bare top-level
+         menu (no parent), same pattern custom_leads itself uses for its
+         own "Leads" menu, instead. Visible to every internal user so an
+         Approver can always reach Approvals; the narrower items below
+         restrict themselves individually. -->
+    <menuitem id="menu_lead_export_root" name="Lead Export"
+              groups="base.group_user" sequence="90"/>
+    <menuitem id="menu_lead_export_request" name="Request Export" parent="menu_lead_export_root"
+              action="action_export_request_wizard"
+              groups="otm_lead_export_guard.group_lead_export" sequence="1"/>
+    <menuitem id="menu_lead_export_requests" name="Export Requests" parent="menu_lead_export_root"
+              action="action_lead_export_request"
+              groups="otm_lead_export_guard.group_lead_export,base.group_system" sequence="2"/>
+    <menuitem id="menu_lead_export_approvals" name="Approvals" parent="menu_lead_export_root"
+              action="action_export_approval_wizard" sequence="3"/>
+    <menuitem id="menu_lead_export_approvers" name="Approvers" parent="menu_lead_export_root"
+              action="action_lead_export_approver" groups="base.group_system" sequence="4"/>
     <menuitem id="menu_lead_export_access" name="Export Access" parent="menu_lead_export_root"
-              action="action_lead_export_access" sequence="1"/>
+              action="action_lead_export_access" groups="base.group_system" sequence="5"/>
     <menuitem id="menu_lead_export_log" name="Export Log" parent="menu_lead_export_root"
-              action="action_lead_export_log" sequence="2"/>
+              action="action_lead_export_log" groups="base.group_system" sequence="6"/>
 </odoo>

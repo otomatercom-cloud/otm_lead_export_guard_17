@@ -5,4 +5,17 @@
         <field name="comment">Only users in this group can export leads. Everyone else is blocked.</field>
         <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('base.group_allow_export'))]"/>
     </record>
+
+    <!-- US4/US6/US7: a requester sees only their own requests; a full
+         administrator (base.group_system) sees all. Deliberately does
+         NOT grant an approver cross-user visibility here — that is
+         handled inside the Approvals wizard with an explicit
+         eligibility check plus sudo(), per spec.md Open Question 3 and
+         plan.md "Security". Domain is exactly as specified in the brief. -->
+    <record id="rule_otm_lead_export_request_own" model="ir.rule">
+        <field name="name">Lead export request: own or admin</field>
+        <field name="model_id" ref="model_otm_lead_export_request"/>
+        <field name="domain_force">[(1,'=',1)] if user.has_group('base.group_system') else [('user_id','=',user.id)]</field>
+        <field name="groups" eval="[]"/>
+    </record>
 </odoo>
