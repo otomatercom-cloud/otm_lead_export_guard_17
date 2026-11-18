@@ -62,3 +62,5 @@ the file it touches.
       naming decision (reveal event logged as `requested` + note, no 8th
       result value invented). Both written up in plan.md/spec.md.
 - [x] T24 — zip, test checklist, deploy steps, deliver
+- [x] T25 — role redesign: staff default group, approver group synced from Approvers list, per-role menus, request ir.rule, migration 17.0.1.2.0
+- [x] T26 — real Odoo 17 + Postgres 16 rig: fresh install, `-u` upgrade from 1.1.0, e2e matrix (menus per role, request, approve, wrong x3 lock, unlock window, expiry, cron, approver sync) — 35/35 pass

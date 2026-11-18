@@ -58,7 +58,7 @@ class OtmLeadExportApprovalWizardLine(models.TransientModel):
         self.wizard_id._check_is_approver()
         request = self.request_id.sudo()
         try:
-            code = request.action_approve_and_reveal(self.env.user)
+            code = request._approve_and_reveal(self.env.user)
         except UserError as exc:
             return {
                 'type': 'ir.actions.client',

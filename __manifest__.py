@@ -1,6 +1,6 @@
 {
     'name': 'Lead Export Guard',
-    'version': '17.0.1.1.0',
+    'version': '17.0.1.2.0',
     'summary': 'Blocks lead export for everyone except a code-approved, '
                 'time-limited unlock granted by a Director. Logs every step.',
     'author': 'Otomater',
@@ -12,6 +12,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/export_unlock_cron.xml',
+        'data/export_defaults.xml',
         'views/export_request_wizard_views.xml',
         'views/export_approval_wizard_views.xml',
         'views/export_enter_code_wizard_views.xml',

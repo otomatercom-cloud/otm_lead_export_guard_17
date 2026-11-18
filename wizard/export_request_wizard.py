@@ -18,7 +18,7 @@ class OtmLeadExportRequestWizard(models.TransientModel):
             'reason': self.reason,
             'minutes': self.minutes,
         })
-        request._log('requested', note='Request submitted')
+        # ('requested' is logged by the request model's own create().)
         # Close this popup and land on the request's own form (statusbar +
         # the "Enter Code" button, which appears automatically once a
         # Director approves it) — rather than leaving the user on just a

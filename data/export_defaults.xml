@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Newly created internal users start with "Lead Export Allowed" so any
+         staff member can raise an export request. Existing users are
+         covered by post_init_hook (fresh install) and
+         migrations/17.0.1.2.0 (upgrade). An administrator can still remove
+         the group from a specific user under Lead Export > Export Access. -->
+    <record id="base.default_user" model="res.users">
+        <field name="groups_id" eval="[(4, ref('otm_lead_export_guard.group_lead_export'))]"/>
+    </record>
+</odoo>

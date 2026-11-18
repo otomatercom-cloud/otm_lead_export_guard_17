@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import hmac
 import logging
@@ -59,21 +60,30 @@ class OtmLeadExportRequest(models.Model):
         return hmac.compare_digest(self._hash_code(code), self.code_hash)
 
     # ── Lifecycle ────────────────────────────────────────────────────
-    @api.model
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         # "a new request expires the previous open one" — supersede the
         # requester's own still-open requests before creating the new one.
-        user_id = vals.get('user_id', self.env.user.id)
-        open_requests = self.sudo().search([
-            ('user_id', '=', user_id), ('state', 'in', ('sent', 'approved')),
-        ])
-        for req in open_requests:
-            req._expire(reason='superseded by a new request')
-        return super().create(vals)
+        for vals in vals_list:
+            user_id = vals.get('user_id', self.env.user.id)
+            open_requests = self.sudo().search([
+                ('user_id', '=', user_id), ('state', 'in', ('sent', 'approved')),
+            ])
+            for req in open_requests:
+                req._expire(reason='superseded by a new request')
+        records = super().create(vals_list)
+        for rec in records:
+            # Same transaction as the create on purpose (isolated=False): the
+            # brand-new request row is not committed yet, so a log row written
+            # on a separate cursor would hit a foreign-key violation on
+            # request_id and be silently lost (found by running this on a real
+            # Odoo 17 server). Nothing after this point can raise.
+            rec._log('requested', note='Request submitted', isolated=False)
+        return records
 
-    def _log(self, result, note=''):
+    def _log(self, result, note='', isolated=True):
         self.ensure_one()
-        self.env['otm.lead.export.log'].sudo()._log_isolated({
+        vals = {
             'user_id': self.user_id.id,
             'model': 'leads.logic',
             'record_count': 0,
@@ -81,9 +91,14 @@ class OtmLeadExportRequest(models.Model):
             'result': result,
             'note': note,
             'request_id': self.id,
-        })
+        }
+        Log = self.env['otm.lead.export.log'].sudo()
+        if isolated:
+            Log._log_isolated(vals)
+        else:
+            Log.create(vals)
 
-    def action_approve_and_reveal(self, approver_user):
+    def _approve_and_reveal(self, approver_user):
         """Called only from the approval wizard, which has already
         verified `approver_user` is an active approver and not the
         requester. Generates the code, stores only its hash, hands the
@@ -99,7 +114,7 @@ class OtmLeadExportRequest(models.Model):
             'state': 'approved',
             'code_hash': code_hash,
             'code_plain_pending': code,  # written and read back in the same call…
-            'code_expiry': fields.Datetime.now() + __import__('datetime').timedelta(minutes=CODE_VALID_MINUTES),
+            'code_expiry': fields.Datetime.now() + datetime.timedelta(minutes=CODE_VALID_MINUTES),
             'attempts': 0,
             'approver_id': approver_user.id,
         })
@@ -162,7 +177,7 @@ class OtmLeadExportRequest(models.Model):
             return False, _("The code has expired. Submit a new export request.")
         if self._code_matches(code):
             minutes = int(self.minutes)
-            self.write({'unlocked_until': now + __import__('datetime').timedelta(minutes=minutes)})
+            self.write({'unlocked_until': now + datetime.timedelta(minutes=minutes)})
             self._log('unlocked', note=f'Unlocked for {minutes} minutes')
             return True, _("Unlocked. You can export for the next %s minutes.") % minutes
         # Wrong code: increment the counter on its OWN cursor so a later
@@ -235,7 +250,6 @@ class OtmLeadExportRequest(models.Model):
         """Odoo 17: cron methods are plain @api.model methods called by
         ir.cron, no special decorator needed."""
         now = fields.Datetime.now()
-        import datetime
         sent_cutoff = now - datetime.timedelta(minutes=SENT_EXPIRY_MINUTES)
         stale_sent = self.sudo().search([('state', '=', 'sent'), ('request_date', '<', sent_cutoff)])
         for req in stale_sent:

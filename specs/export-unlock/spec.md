@@ -126,3 +126,21 @@ on them — correct me if any is wrong and I'll adjust.
    ("Code revealed by <approver>") as the only way to tell the two
    `requested` rows for one request apart. Easy to change to a dedicated
    value if that's not what you want.
+8. **Role model (17.0.1.2.0 redesign).** Original build gated *Request
+   Export* behind `group_lead_export`, which an admin had to tick per user,
+   and showed *Approvals* to everyone in that group. Real-server test
+   showed plain staff could not request at all, and any group member could
+   open Approvals. Now:
+   - STAFF = `group_lead_export` ("Lead Export Allowed"), granted to every
+     internal user by default (install hook, upgrade migration,
+     `base.default_user` for new users). Sees Request Export + own
+     Export Requests. Admin can still switch an individual off in Export
+     Access. Membership never allows export on its own; the server guard
+     still needs an approved, unexpired unlock.
+   - APPROVER = `group_lead_export_approver`, never assigned by hand: it
+     mirrors the admin-only Approvers list (create / deactivate / delete
+     all sync). Sees Approvals. Cannot see Approvers / Export Access / Log.
+   - ADMIN (`base.group_system`) = Approvers, Export Access, Export Log.
+     Still no export bypass.
+   Alternative if "only admin-enabled staff may request" is wanted: drop
+   `data/export_defaults.xml`, the migration and `grant_staff_defaults`.

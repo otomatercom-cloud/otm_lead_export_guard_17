@@ -1,17 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- STAFF: may request an export unlock and, once a Director approves,
+         export for the approved window. Every internal user gets this by
+         default (see data/export_defaults.xml + the install/migration
+         hooks) so any staff member can raise a request; an administrator
+         can still switch an individual user off under Lead Export >
+         Export Access. Membership alone never lets anyone export — the
+         server-side guard also demands an approved, unexpired unlock. -->
     <record id="group_lead_export" model="res.groups">
         <field name="name">Lead Export Allowed</field>
-        <field name="comment">Only users in this group can export leads. Everyone else is blocked.</field>
+        <field name="comment">May request an export approval and export during an approved window. Without an approved unlock nobody can export.</field>
         <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('base.group_allow_export'))]"/>
     </record>
 
+    <!-- APPROVER: may open Lead Export > Approvals and reveal codes.
+         Membership is NOT edited by hand — it is kept in sync, one way,
+         with the admin-only Lead Export > Approvers list
+         (models/export_approver.py), so only an administrator ever
+         decides who can approve. -->
+    <record id="group_lead_export_approver" model="res.groups">
+        <field name="name">Lead Export Approver</field>
+        <field name="comment">Managed automatically from Lead Export > Approvers (administrator only). Do not assign by hand.</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
     <!-- US4/US6/US7: a requester sees only their own requests; a full
-         administrator (base.group_system) sees all. Deliberately does
-         NOT grant an approver cross-user visibility here — that is
-         handled inside the Approvals wizard with an explicit
-         eligibility check plus sudo(), per spec.md Open Question 3 and
-         plan.md "Security". Domain is exactly as specified in the brief. -->
+         administrator (base.group_system) sees all. Approvers do not get
+         cross-user visibility here — the Approvals wizard does an explicit
+         eligibility check plus sudo(), per spec.md Open Question 3.
+         Domain is exactly as specified in the brief. -->
     <record id="rule_otm_lead_export_request_own" model="ir.rule">
         <field name="name">Lead export request: own or admin</field>
         <field name="model_id" ref="model_otm_lead_export_request"/>
