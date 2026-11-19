@@ -237,3 +237,5 @@ group_system, create/read only, no write/unlink needed on wizards).
 | Log row written on an isolated cursor references an uncommitted row (new request) | FK violation, row silently lost. Create-time `requested` log now uses the normal cursor (`isolated=False`); isolated cursors only for logs that must survive a raise (wrong_code, locked, expired, blocked, exported). Found on a real Odoo 17 rig. |
 | Staff could not request; Approvals visible to all group members | Role model split into staff / approver / admin groups (spec.md OQ8). Verified by the per-role matrix in `tests`: 35/35 checks. |
 | Public `action_approve_and_reveal` callable over RPC | Renamed `_approve_and_reveal` (Odoo refuses `_` methods remotely); only the approval wizard calls it, after the approver check. |
+| `<menuitem groups>` on `-u` only ADDS groups; old Settings group stayed on Export Access | 17.0.1.3.0 migration removes `base.group_system` from all module menus. |
+| User makes themselves Lead Admin then passes the "am I admin" check | Actor check runs before `super().write`. |

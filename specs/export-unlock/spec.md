@@ -144,3 +144,16 @@ on them — correct me if any is wrong and I'll adjust.
      Still no export bypass.
    Alternative if "only admin-enabled staff may request" is wanted: drop
    `data/export_defaults.xml`, the migration and `grant_staff_defaults`.
+9. **Settings is not export admin (17.0.1.3.0).** Some people need
+   Settings (`base.group_system`) but must not see or control export
+   approvals, so Approvers / Export Access / Export Log, the "see all
+   requests" rule and the module ACLs now belong to a dedicated
+   `group_lead_export_admin` ("Lead Export Admin"). Only an existing
+   Lead Export Admin can change STAFF / APPROVER / ADMIN membership
+   (`res.users.write/create`, `res.groups.write` guard in
+   `models/res_users.py`; decided BEFORE the write so nobody can
+   self-promote). First member = built-in admin user (hook/migration);
+   while the group is empty a Settings user may assign it (anti
+   lock-out). A Lead Admin without Settings can toggle Export Access and
+   manage Approvers but cannot edit users generally; promoting another
+   Lead Admin needs someone with both Settings and Lead Export Admin.

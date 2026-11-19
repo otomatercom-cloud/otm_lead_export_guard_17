@@ -24,15 +24,27 @@
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
+    <!-- LEAD EXPORT ADMIN: Approvers, Export Access, Export Log and the
+         right to see every request. Deliberately NOT base.group_system:
+         people who need Settings must not automatically see or control
+         export approvals. Membership can only be changed by an existing
+         Lead Export Admin (models/res_users.py guard); the very first
+         member is the built-in admin user (install hook / migration). -->
+    <record id="group_lead_export_admin" model="res.groups">
+        <field name="name">Lead Export Admin</field>
+        <field name="comment">Manages Lead Export approvers and export access, and can see the export log. Independent of Settings access.</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
     <!-- US4/US6/US7: a requester sees only their own requests; a full
-         administrator (base.group_system) sees all. Approvers do not get
+         Lead Export Admin sees all. Approvers do not get
          cross-user visibility here — the Approvals wizard does an explicit
          eligibility check plus sudo(), per spec.md Open Question 3.
          Domain is exactly as specified in the brief. -->
     <record id="rule_otm_lead_export_request_own" model="ir.rule">
         <field name="name">Lead export request: own or admin</field>
         <field name="model_id" ref="model_otm_lead_export_request"/>
-        <field name="domain_force">[(1,'=',1)] if user.has_group('base.group_system') else [('user_id','=',user.id)]</field>
+        <field name="domain_force">[(1,'=',1)] if user.has_group('otm_lead_export_guard.group_lead_export_admin') else [('user_id','=',user.id)]</field>
         <field name="groups" eval="[]"/>
     </record>
 </odoo>

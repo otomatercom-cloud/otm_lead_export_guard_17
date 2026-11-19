@@ -64,3 +64,4 @@ the file it touches.
 - [x] T24 — zip, test checklist, deploy steps, deliver
 - [x] T25 — role redesign: staff default group, approver group synced from Approvers list, per-role menus, request ir.rule, migration 17.0.1.2.0
 - [x] T26 — real Odoo 17 + Postgres 16 rig: fresh install, `-u` upgrade from 1.1.0, e2e matrix (menus per role, request, approve, wrong x3 lock, unlock window, expiry, cron, approver sync) — 35/35 pass
+- [x] T27 — Lead Export Admin group, role-change guard, 17.0.1.3.0 migration (strips Settings from menus), 18/18 role checks + 35/35 flow checks on fresh install and upgrade

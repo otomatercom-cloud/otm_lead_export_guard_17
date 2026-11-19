@@ -70,7 +70,7 @@
     </record>
 
     <!-- Export Requests: own requests for a normal user, everyone's for
-         base.group_system — enforced by rule_otm_lead_export_request_own,
+         Lead Export Admin — enforced by rule_otm_lead_export_request_own,
          not by this view. -->
     <record id="view_lead_export_request_list" model="ir.ui.view">
         <field name="name">otm.lead.export.request.list</field>
@@ -138,7 +138,7 @@
                -> Request Export, Export Requests (their own only)
            APPROVER (group_lead_export_approver, kept in sync with the
                admin-only Approvers list) -> + Approvals
-           ADMIN (base.group_system) -> + Approvers, Export Access, Export Log
+           LEAD EXPORT ADMIN (group_lead_export_admin, not Settings) -> + Approvers, Export Access, Export Log
          Deliberately NOT parented under base.menu_administration: that
          menu is itself restricted to base.group_system/base.group_erp_manager
          (Odoo 17 base/views/base_menus.xml), so staff and approvers would
@@ -148,22 +148,22 @@
          Odoo falling back to the first child, which was a popup wizard. -->
     <menuitem id="menu_lead_export_root" name="Lead Export"
               action="action_lead_export_request"
-              groups="otm_lead_export_guard.group_lead_export,otm_lead_export_guard.group_lead_export_approver,base.group_system"
+              groups="otm_lead_export_guard.group_lead_export,otm_lead_export_guard.group_lead_export_approver,otm_lead_export_guard.group_lead_export_admin"
               sequence="90"/>
     <menuitem id="menu_lead_export_request" name="Request Export" parent="menu_lead_export_root"
               action="action_export_request_wizard"
               groups="otm_lead_export_guard.group_lead_export" sequence="1"/>
     <menuitem id="menu_lead_export_requests" name="Export Requests" parent="menu_lead_export_root"
               action="action_lead_export_request"
-              groups="otm_lead_export_guard.group_lead_export,otm_lead_export_guard.group_lead_export_approver,base.group_system"
+              groups="otm_lead_export_guard.group_lead_export,otm_lead_export_guard.group_lead_export_approver,otm_lead_export_guard.group_lead_export_admin"
               sequence="2"/>
     <menuitem id="menu_lead_export_approvals" name="Approvals" parent="menu_lead_export_root"
               action="action_export_approval_wizard"
               groups="otm_lead_export_guard.group_lead_export_approver" sequence="3"/>
     <menuitem id="menu_lead_export_approvers" name="Approvers" parent="menu_lead_export_root"
-              action="action_lead_export_approver" groups="base.group_system" sequence="4"/>
+              action="action_lead_export_approver" groups="otm_lead_export_guard.group_lead_export_admin" sequence="4"/>
     <menuitem id="menu_lead_export_access" name="Export Access" parent="menu_lead_export_root"
-              action="action_lead_export_access" groups="base.group_system" sequence="5"/>
+              action="action_lead_export_access" groups="otm_lead_export_guard.group_lead_export_admin" sequence="5"/>
     <menuitem id="menu_lead_export_log" name="Export Log" parent="menu_lead_export_root"
-              action="action_lead_export_log" groups="base.group_system" sequence="6"/>
+              action="action_lead_export_log" groups="otm_lead_export_guard.group_lead_export_admin" sequence="6"/>
 </odoo>
