@@ -16,6 +16,12 @@ MAX_ATTEMPTS = 3
 
 class OtmLeadExportRequest(models.Model):
     _name = 'otm.lead.export.request'
+
+    @api.depends('user_id', 'request_date')
+    def _compute_display_name(self):
+        # without this the breadcrumb / Many2one shows "otm.lead.export.request,73"
+        for rec in self:
+            rec.display_name = _("Export request #%(id)s - %(user)s", id=rec.id or '', user=rec.user_id.name or '')
     _description = 'Lead Export Unlock Request'
     _order = 'id desc'
 

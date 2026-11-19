@@ -10,6 +10,25 @@ class OtmLeadExportApprovalWizard(models.TransientModel):
         'otm.lead.export.approval.wizard.line', 'wizard_id', string='Pending Requests')
 
     @api.model
+    def action_open(self):
+        """Menu entry point. The wizard is created (saved) BEFORE it is shown:
+        a form opened straight from an act_window is an unsaved virtual
+        record, and Odoo refuses row buttons on lines of an unsaved parent
+        with 'Please click on the "save" button first' (reported after a
+        real test). Opening an existing record has no such problem."""
+        self._check_is_approver()
+        wizard = self.create({})  # default_get fills line_ids
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Approvals',
+            'res_model': self._name,
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'views': [(False, 'form')],
+            'target': 'new',
+        }
+
+    @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
         self._check_is_approver()
@@ -77,5 +96,7 @@ class OtmLeadExportApprovalWizardLine(models.TransientModel):
                             f'too in case that mail does not arrive.',
                 'sticky': True,
                 'type': 'success',
+                # reopen a fresh list so the approved request disappears
+                'next': self.env['otm.lead.export.approval.wizard'].action_open(),
             },
         }

@@ -239,3 +239,4 @@ group_system, create/read only, no write/unlink needed on wizards).
 | Public `action_approve_and_reveal` callable over RPC | Renamed `_approve_and_reveal` (Odoo refuses `_` methods remotely); only the approval wizard calls it, after the approver check. |
 | `<menuitem groups>` on `-u` only ADDS groups; old Settings group stayed on Export Access | 17.0.1.3.0 migration removes `base.group_system` from all module menus. |
 | User makes themselves Lead Admin then passes the "am I admin" check | Actor check runs before `super().write`. |
+| Row button inside a wizard's One2many says "Please click on the 'save' button first" | A form opened straight from an act_window is an unsaved virtual record. Menu now runs a server action that `create()`s the wizard and returns an act_window with `res_id` (`action_open`). Verified in headless Chromium. |

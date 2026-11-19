@@ -1,6 +1,6 @@
 {
     'name': 'Lead Export Guard',
-    'version': '17.0.1.3.1',
+    'version': '17.0.1.3.3',
     'summary': 'Blocks lead export for everyone except a code-approved, '
                 'time-limited unlock granted by a Director. Logs every step.',
     'author': 'Otomater',

@@ -158,7 +158,7 @@
               groups="otm_lead_export_guard.group_lead_export,otm_lead_export_guard.group_lead_export_approver,otm_lead_export_guard.group_lead_export_admin"
               sequence="2"/>
     <menuitem id="menu_lead_export_approvals" name="Approvals" parent="menu_lead_export_root"
-              action="action_export_approval_wizard"
+              action="action_export_approval_open"
               groups="otm_lead_export_guard.group_lead_export_approver" sequence="3"/>
     <menuitem id="menu_lead_export_approvers" name="Approvers" parent="menu_lead_export_root"
               action="action_lead_export_approver" groups="otm_lead_export_guard.group_lead_export_admin" sequence="4"/>
