@@ -10,10 +10,12 @@
                          and the only interaction is the action button, so
                          inline-edit mode isn't needed. editable="bottom" was
                          what caused Odoo's "Please click on the save button
-                         first" warning with no actual Save button in reach
+                         first" warning with no actual Save button in reach. no_open="1": clicking a
+                         row used to open an empty auto-generated form dialog
+                         ("Open: Pending Requests", reported after a real test)
                          (reported after a real test) — a plain list view
                          doesn't demand that save step for an action button. -->
-                    <tree create="0" delete="0">
+                    <tree create="0" delete="0" edit="0" no_open="1">
                         <field name="requester_id" readonly="1"/>
                         <field name="request_date" readonly="1"/>
                         <field name="minutes" readonly="1"/>
